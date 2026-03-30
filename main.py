@@ -4,6 +4,21 @@ from datetime import datetime
 import requests
 
 
+FEEDS = {
+    "Terkini"      : "https://www.antaranews.com/rss/terkini.xml",
+    "Top News"     : "https://www.antaranews.com/rss/top-news.xml",
+    "Politik"      : "https://www.antaranews.com/rss/politik.xml",
+    "Hukum"        : "https://www.antaranews.com/rss/hukum.xml",
+    "Ekonomi"      : "https://www.antaranews.com/rss/ekonomi.xml",
+    "Bisnis"       : "https://www.antaranews.com/rss/ekonomi-bisnis.xml",
+    "Metro"        : "https://www.antaranews.com/rss/metro.xml",
+    "Kriminalitas" : "https://www.antaranews.com/rss/metro-kriminalitas.xml",
+    "Jabar"        : "https://jabar.antaranews.com/rss/terkini.xml",
+}
+
+
+
+
 def fetch_bmkg_earthquake():
     """Fetch latest earthquake data from BMKG"""
     url = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
@@ -63,15 +78,6 @@ if __name__ == "__main__":
 
 
 # ANTARA RSS Feed URLs tinggal 
-FEEDS = {
-    "Terkini"   : "https://www.antaranews.com/rss/terkini.xml",
-    "Nasional"  : "https://www.antaranews.com/rss/nasional.xml",
-    "Hukum"     : "https://www.antaranews.com/rss/hukum.xml",
-    "Ekonomi"   : "https://www.antaranews.com/rss/ekonomi.xml",
-    "Olahraga"  : "https://www.antaranews.com/rss/olahraga.xml",
-    "Teknologi" : "https://www.antaranews.com/rss/tekno.xml",
-    "Internasional": "https://www.antaranews.com/rss/internasional.xml",
-}
 
 def fetch_feed(name, url, count=5):
     """Fetch and display articles from an RSS feed"""
