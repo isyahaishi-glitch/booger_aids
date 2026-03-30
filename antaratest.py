@@ -1,11 +1,23 @@
 import feedparser
-import json
-from datetime import datetime
 import requests
+import re
+from datetime import datetime
 
+def safe_parse(url):
+    """Fetch and sanitize RSS feed before parsing to avoid XML token errors"""
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        # Remove invalid XML characters
+        content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', response.text)
+        return feedparser.parse(content)
+    except Exception as e:
+        print(f"❌ Failed to fetch {url}: {e}")
+        return None
 
+# ANTARA RSS Feed URLs
 FEEDS = {
-                        # ANTARA NEWS
     "Terkini"      : "https://www.antaranews.com/rss/terkini.xml",
     "Top News"     : "https://www.antaranews.com/rss/top-news.xml",
     "Politik"      : "https://www.antaranews.com/rss/politik.xml",
@@ -15,88 +27,16 @@ FEEDS = {
     "Metro"        : "https://www.antaranews.com/rss/metro.xml",
     "Kriminalitas" : "https://www.antaranews.com/rss/metro-kriminalitas.xml",
     "Jabar"        : "https://jabar.antaranews.com/rss/terkini.xml",
-
-                        # BBC
-    "Top Stories"  : "https://feeds.bbci.co.uk/news/rss.xml",
-    "World"        : "https://feeds.bbci.co.uk/news/world/rss.xml",
-    "Asia"         : "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
-    "Technology"   : "https://feeds.bbci.co.uk/news/technology/rss.xml",
-    "Science"      : "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
-    "Business"     : "https://feeds.bbci.co.uk/news/business/rss.xml",
-    "Health"       : "https://feeds.bbci.co.uk/news/health/rss.xml",
 }
-
-
-
-
-def fetch_bmkg_earthquake():
-    """Fetch latest earthquake data from BMKG"""
-    url = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
-    
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        
-        gempa = data["Infogempa"]["gempa"]
-        
-        print("=" * 50)
-        print("🌍 BMKG - GEMPA TERKINI")
-        print("=" * 50)
-        print(f"📅 Tanggal  : {gempa['Tanggal']}")
-        print(f"🕐 Jam      : {gempa['Jam']}")
-        print(f"📍 Wilayah  : {gempa['Wilayah']}")
-        print(f"💥 Magnitudo: {gempa['Magnitude']}")
-        print(f"📏 Kedalaman: {gempa['Kedalaman']}")
-        print(f"🌐 Koordinat: {gempa['Lintang']}, {gempa['Bujur']}")
-        print(f"⚠️  Potensi  : {gempa['Potensi']}")
-        print("=" * 50)
-        
-        return gempa
-        
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Error fetching BMKG data: {e}")
-        return None
-
-def fetch_bmkg_recent(count=5):
-    """Fetch last N earthquakes from BMKG"""
-    url = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
-    
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        
-        gempa_list = data["Infogempa"]["gempa"][:count]
-        
-        print(f"\n📋 {count} GEMPA TERAKHIR:")
-        print("=" * 50)
-        for i, g in enumerate(gempa_list, 1):
-            print(f"{i}. [{g['Tanggal']} {g['Jam']}] M{g['Magnitude']} - {g['Wilayah']}")
-        print("=" * 50)
-        
-        return gempa_list
-        
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Error: {e}")
-        return None
-
-if __name__ == "__main__":
-    fetch_bmkg_earthquake()   # Latest single earthquake
-    fetch_bmkg_recent(5)      # Last 5 earthquakes
-
-
-
-# ANTARA RSS Feed URLs A
 
 def fetch_feed(name, url, count=5):
     """Fetch and display articles from an RSS feed"""
     print(f"\n📰 ANTARA - {name.upper()}")
     print("=" * 60)
     
-    feed = feedparser.parse(url)
+    feed = safe_parse(url)
     
-    if feed.bozo:
+    if feed is None or feed.bozo:
         print(f"❌ Error parsing feed: {feed.bozo_exception}")
         return []
     
@@ -143,10 +83,8 @@ if __name__ == "__main__":
         articles = fetch_feed(name, url, count=5)
         all_articles.extend(articles)
     
-    # Test keyword filter/// 
-    KEYWORDS = [
-        # "gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"
-        ]
+    # Test keyword filter
+    KEYWORDS = ["gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"]
     
     print("\n" + "=" * 60)
     print("🔍 KEYWORD FILTER RESULTS")
