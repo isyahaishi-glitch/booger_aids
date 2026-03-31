@@ -2,7 +2,8 @@ import feedparser
 import json
 from datetime import datetime
 import requests
-
+urlbmkg = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
+urlbmkg2 = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
 
 FEEDS = {
                         # ANTARA NEWS
@@ -31,10 +32,10 @@ FEEDS = {
 
 def fetch_bmkg_earthquake():
     """Fetch latest earthquake data from BMKG"""
-    url = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
+    # url = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
     
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(urlbmkg, timeout=10)
         response.raise_for_status()
         data = response.json()
         
@@ -60,10 +61,10 @@ def fetch_bmkg_earthquake():
 
 def fetch_bmkg_recent(count=5):
     """Fetch last N earthquakes from BMKG"""
-    url = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
+    # url = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
     
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(urlbmkg2, timeout=10)
         response.raise_for_status()
         data = response.json()
         
@@ -81,17 +82,15 @@ def fetch_bmkg_recent(count=5):
         print(f"❌ Error: {e}")
         return None
 
-if __name__ == "__main__":
-    fetch_bmkg_earthquake()   # Latest single earthquake
-    fetch_bmkg_recent(5)      # Last 5 earthquakes
 
 
 
-# ANTARA RSS Feed URLs A
+
+# ANTARA RSS Feed URLs 
 
 def fetch_feed(name, url, count=5):
     """Fetch and display articles from an RSS feed"""
-    print(f"\n📰 ANTARA - {name.upper()}")
+    print(f"\n📰  {name.upper()}")
     print("=" * 60)
     
     feed = feedparser.parse(url)
@@ -125,6 +124,8 @@ def fetch_feed(name, url, count=5):
 
 def keyword_filter(articles, keywords):
     """Simple keyword filter for OSINT relevance"""
+    if not keywords:  # ← if empty, return everything
+        return articles
     matched = []
     for article in articles:
         text = (article["title"] + " " + article["summary"]).lower()
@@ -136,11 +137,15 @@ def keyword_filter(articles, keywords):
     return matched
 
 if __name__ == "__main__":
+
+    fetch_bmkg_earthquake()   # Latest single earthquake
+    fetch_bmkg_recent(5)      # Last 5 earthquakes
+
     all_articles = []
     
     # Fetch terkini and nasional feeds
-    for name, url in list(FEEDS.items())[:3]:
-        articles = fetch_feed(name, url, count=5)
+    for name, url in FEEDS.items():
+        articles = fetch_feed(name, url, count=10)
         all_articles.extend(articles)
     
     # Test keyword filter/// 
