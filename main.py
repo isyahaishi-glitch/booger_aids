@@ -162,7 +162,8 @@ if __name__ == "__main__":
     
     if matched:
         for a in matched:
-            print(f"✅ [{a['matched_keyword'].upper()}] {a['title']}")
+            kw = a.get('matched_keyword', 'ALL')
+            print(f"✅ [{kw.upper()}] {a['title']}")
             print(f"   {a['link']}\n")
     else:
         print("No articles matched the keywords.")
