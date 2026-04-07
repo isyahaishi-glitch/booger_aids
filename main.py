@@ -26,12 +26,12 @@ FEEDS = {
 
                         # BBC
     "Top Stories"  : "https://feeds.bbci.co.uk/news/rss.xml",
-    "World"        : "https://feeds.bbci.co.uk/news/world/rss.xml",
-    "Asia"         : "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
-    "Technology"   : "https://feeds.bbci.co.uk/news/technology/rss.xml",
-    "Science"      : "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
-    "Business"     : "https://feeds.bbci.co.uk/news/business/rss.xml",
-    "Health"       : "https://feeds.bbci.co.uk/news/health/rss.xml",
+    # "World"        : "https://feeds.bbci.co.uk/news/world/rss.xml",
+    # "Asia"         : "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
+    # "Technology"   : "https://feeds.bbci.co.uk/news/technology/rss.xml",
+    # "Science"      : "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+    # "Business"     : "https://feeds.bbci.co.uk/news/business/rss.xml",
+    # "Health"       : "https://feeds.bbci.co.uk/news/health/rss.xml",
 }
 
 
