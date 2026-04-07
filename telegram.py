@@ -11,7 +11,7 @@ api_hash = Thash
 client = TelegramClient("session", api_id, api_hash)
 
 async def main():
-    messages = await client.get_messages("somechannel", limit=10)
+    messages = await client.get_messages("somechannel", limit=1)
     
     for msg in messages:
         print(msg.text)
