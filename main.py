@@ -29,7 +29,6 @@ FEEDS = {
 
 
 
-
 def fetch_bmkg_earthquake():
     """Fetch latest earthquake data from BMKG"""
     # url = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"

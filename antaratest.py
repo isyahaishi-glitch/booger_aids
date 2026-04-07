@@ -18,15 +18,7 @@ def safe_parse(url):
 
 # ANTARA RSS Feed URLs
 FEEDS = {
-    "Terkini"      : "https://www.antaranews.com/rss/terkini.xml",
-    "Top News"     : "https://www.antaranews.com/rss/top-news.xml",
-    "Politik"      : "https://www.antaranews.com/rss/politik.xml",
-    "Hukum"        : "https://www.antaranews.com/rss/hukum.xml",
-    "Ekonomi"      : "https://www.antaranews.com/rss/ekonomi.xml",
-    "Bisnis"       : "https://www.antaranews.com/rss/ekonomi-bisnis.xml",
-    "Metro"        : "https://www.antaranews.com/rss/metro.xml",
-    "Kriminalitas" : "https://www.antaranews.com/rss/metro-kriminalitas.xml",
-    "Jabar"        : "https://jabar.antaranews.com/rss/terkini.xml",
+
 }
 
 def fetch_feed(name, url, count=5):
@@ -84,7 +76,7 @@ if __name__ == "__main__":
         all_articles.extend(articles)
     
     # Test keyword filter
-    KEYWORDS = ["gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"]
+    # KEYWORDS = ["gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"]
     
     print("\n" + "=" * 60)
     print("🔍 KEYWORD FILTER RESULTS")
