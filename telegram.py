@@ -15,7 +15,16 @@ async def main():
     channels = [
         "warmonitors",
         "DDGeopolitics",
-        "FinancialJuice"
+        "FinancialJuice",
+        "medmannews",
+        "intelslava",
+        "boris_rozhin",
+        "nexta_live",
+        "rnintel",
+        "TheIslanderNews",
+        "Slavyangrad",
+        "geopolitics_prime",
+        "worldpravda"
 ]
 
     for ch in channels:
