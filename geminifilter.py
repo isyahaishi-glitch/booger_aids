@@ -12,6 +12,12 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 ANTARA_TERKINI = "https://www.antaranews.com/rss/terkini.xml"
 GEMINI_API_KEY = GEMINI_API_KEY 
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+SEVERITY_RUBRIC = """
+- CRITICAL: Active data breaches, ransomware on government/infrastructure, or national security threats.
+- HIGH: Significant corruption, large-scale financial fraud, or major cyber attacks on private companies.
+- MEDIUM: Legal cases, regional protests, minor data leaks, or policy changes affecting security.
+- LOW: General news, routine arrests, planned maintenance, or sports/entertainment.
+"""
 # ────────────────────────────────────────────────────────
 
 def safe_parse(url):
@@ -44,11 +50,17 @@ def fetch_single_article():
 def analyze_with_ai(article):
     # Move the persona to a system instruction if possible, 
     # but for a simple POST request, we'll keep it in the prompt.
-    prompt = f"""Extract OSINT from this Indonesian news:
-Title: {article['title']}
-Summary: {article['summary']}
+    prompt = f"""
+        Act as an OSINT Analyst. Rate the severity of this Indonesian news:
+        
+        Title: {article['title']}
+        Summary: {article['summary']}
 
-Return JSON with keys: location, location_type, category, entities, keywords, severity, summary_en."""
+        Use these rules for 'severity':
+        {SEVERITY_RUBRIC}
+
+        Return JSON with key: severity
+        """
 
     headers = {"Content-Type": "application/json"}
     body = {
@@ -84,13 +96,13 @@ def print_osint_report(article, analysis):
     print(f"📡 Source    : {article['source']}")
     print()
     if analysis:
-        print(f"📍 Location  : {analysis.get('location', 'N/A')} ({analysis.get('location_type', '')})")
-        print(f"🏷️  Category  : {analysis.get('category', 'N/A')}")
+        # print(f"📍 Location  : {analysis.get('location', 'N/A')} ({analysis.get('location_type', '')})")
+        # print(f"🏷️  Category  : {analysis.get('category', 'N/A')}")
         print(f"⚠️  Severity  : {analysis.get('severity', 'N/A')}")
-        print(f"🔑 Keywords  : {', '.join(analysis.get('keywords', []))}")
-        print(f"👥 Entities  : {', '.join(analysis.get('entities', []))}")
-        print(f"🌐 Summary   : {analysis.get('summary_en', 'N/A')}")
-    else:
+    #     print(f"🔑 Keywords  : {', '.join(analysis.get('keywords', []))}")
+    #     print(f"👥 Entities  : {', '.join(analysis.get('entities', []))}")
+    #     print(f"🌐 Summary   : {analysis.get('summary_en', 'N/A')}")
+    # else:
         print("❌ AI analysis unavailable")
     print("=" * 60)
 
