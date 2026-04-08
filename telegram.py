@@ -2,19 +2,25 @@ from telethon import TelegramClient
 from dotenv import load_dotenv
 import os
 load_dotenv()
-tapiid = int(os.getenv("tapiid"))
+tapiid = os.getenv("tapiid")
 Thash = os.getenv("Thash")
 
-api_id = tapiid
+api_id = int(tapiid)
 api_hash = Thash
 
 client = TelegramClient("session", api_id, api_hash)
 
-async def main():
-    messages = await client.get_messages("somechannel", limit=1)
-    
-    for msg in messages:
-        print(msg.text)
 
+async def main():
+    channels = [
+        "warmonitors",
+        "DDGeopolitics",
+        "FinancialJuice"
+]
+
+    for ch in channels:
+        messages = await client.get_messages(ch, limit=1)
+        for msg in messages:
+            print(f"[{ch}] {msg.text}")
 with client:
     client.loop.run_until_complete(main())
