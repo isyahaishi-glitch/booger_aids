@@ -4,14 +4,37 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 import os
+
+from telethon import TelegramClient
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+tapiid = os.getenv("tapiid")
+Thash = os.getenv("Thash")
+
+api_id = int(tapiid)
+api_hash = Thash
+
+client = TelegramClient("session", api_id, api_hash)
 urlbmkg = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
 urlbmkg2 = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
 ANTARA_TERKINI = "https://www.antaranews.com/rss/terkini.xml"
 GEMINI_API_KEY = GEMINI_API_KEY 
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
 
+channels = [
+    "warmonitors",
+    "DDGeopolitics",
+    "FinancialJuice",
+    "medmannews",
+    "intelslava",
+    "boris_rozhin",
+    "nexta_live",
+    "rnintel",
+    "TheIslanderNews",
+    "Slavyangrad",
+    "geopolitics_prime",
+    "worldpravda"
+]
 FEEDS = {
                         # ANTARA NEWS
     # "Terkini"      : "https://www.antaranews.com/rss/terkini.xml",
@@ -33,6 +56,14 @@ FEEDS = {
     # "Business"     : "https://feeds.bbci.co.uk/news/business/rss.xml",
     # "Health"       : "https://feeds.bbci.co.uk/news/health/rss.xml",
 }
+
+async def main(channels):
+    for ch in channels:
+        messages = await client.get_messages(ch, limit=1)
+        for msg in messages:
+            print(f"[{ch}] {msg.text}")
+with client:
+    client.loop.run_until_complete(main(channels))
 
 
 
@@ -94,7 +125,7 @@ def fetch_bmkg_recent(count=5):
 
 # ANTARA RSS Feed URLs 
 
-def fetch_feed(name, url, count=5):
+def fetch_feed(name, url, count=1):
     """Fetch and display articles from an RSS feed"""
     print(f"\n📰  {name.upper()}")
     print("=" * 60)
