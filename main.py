@@ -14,7 +14,6 @@ channels = channels
 FEEDS = FEEDS
 api_id = int(tapiid)
 api_hash = Thash
-
 client = TelegramClient("session", api_id, api_hash)
 urlbmkg = "https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json"
 urlbmkg2 = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
