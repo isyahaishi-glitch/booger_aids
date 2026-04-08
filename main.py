@@ -4,13 +4,14 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 import os
-
+from URL import channels, FEEDS
 from telethon import TelegramClient
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 tapiid = os.getenv("tapiid")
 Thash = os.getenv("Thash")
-
+channels = channels
+FEEDS = FEEDS
 api_id = int(tapiid)
 api_hash = Thash
 
@@ -20,42 +21,13 @@ urlbmkg2 = "https://data.bmkg.go.id/DataMKG/TEWS/gempaterkini.json"
 ANTARA_TERKINI = "https://www.antaranews.com/rss/terkini.xml"
 GEMINI_API_KEY = GEMINI_API_KEY 
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_API_KEY}"
+SEVERITY_RUBRIC = """
+- CRITICAL: Active data breaches, ransomware on government/infrastructure, or national security threats.
+- HIGH: Significant corruption, large-scale financial fraud, or major cyber attacks on private companies.
+- MEDIUM: Legal cases, regional protests, minor data leaks, or policy changes affecting security.
+- LOW: General news, routine arrests, planned maintenance, or sports/entertainment.
+"""
 
-channels = [
-    "warmonitors",
-    "DDGeopolitics",
-    "FinancialJuice",
-    "medmannews",
-    "intelslava",
-    "boris_rozhin",
-    "nexta_live",
-    "rnintel",
-    "TheIslanderNews",
-    "Slavyangrad",
-    "geopolitics_prime",
-    "worldpravda"
-]
-FEEDS = {
-                        # ANTARA NEWS
-    # "Terkini"      : "https://www.antaranews.com/rss/terkini.xml",
-    # "Top News"     : "https://www.antaranews.com/rss/top-news.xml",
-    # "Politik"      : "https://www.antaranews.com/rss/politik.xml",
-    # "Hukum"        : "https://www.antaranews.com/rss/hukum.xml",
-    # "Ekonomi"      : "https://www.antaranews.com/rss/ekonomi.xml",
-    # "Bisnis"       : "https://www.antaranews.com/rss/ekonomi-bisnis.xml",
-    # "Metro"        : "https://www.antaranews.com/rss/metro.xml",
-    # "Kriminalitas" : "https://www.antaranews.com/rss/metro-kriminalitas.xml",
-    # "Jabar"        : "https://jabar.antaranews.com/rss/terkini.xml",
-
-                        # BBC
-    "Top Stories"  : "https://feeds.bbci.co.uk/news/rss.xml",
-    # "World"        : "https://feeds.bbci.co.uk/news/world/rss.xml",
-    # "Asia"         : "https://feeds.bbci.co.uk/news/world/asia/rss.xml",
-    # "Technology"   : "https://feeds.bbci.co.uk/news/technology/rss.xml",
-    # "Science"      : "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
-    # "Business"     : "https://feeds.bbci.co.uk/news/business/rss.xml",
-    # "Health"       : "https://feeds.bbci.co.uk/news/health/rss.xml",
-}
 
 async def main(channels):
     for ch in channels:
@@ -176,11 +148,17 @@ def keyword_filter(articles, keywords):
 def analyze_with_ai(article):
     # Move the persona to a system instruction if possible, 
     # but for a simple POST request, we'll keep it in the prompt.
-    prompt = f"""Extract OSINT from this Indonesian news:
-Title: {article['title']}
-Summary: {article['summary']}
+    prompt = f"""
+        Act as an OSINT Analyst. Rate the severity of this Indonesian news:
+        
+        Title: {article['title']}
+        Summary: {article['summary']}
 
-Return JSON with keys: location, location_type, category, entities, keywords, severity, summary_en."""
+        Use these rules for 'severity':
+        {SEVERITY_RUBRIC}
+
+        Return JSON with key: severity
+        """
 
     headers = {"Content-Type": "application/json"}
     body = {
