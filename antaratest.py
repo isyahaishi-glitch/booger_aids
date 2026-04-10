@@ -2,6 +2,8 @@ import feedparser
 import requests
 import re
 from datetime import datetime
+from URL import FEEDS
+import time
 
 def safe_parse(url):
     """Fetch and sanitize RSS feed before parsing to avoid XML token errors"""
@@ -17,43 +19,40 @@ def safe_parse(url):
         return None
 
 # ANTARA RSS Feed URLs
-FEEDS = {
-
-}
-
 def fetch_feed(name, url, count=5):
-    """Fetch and display articles from an RSS feed"""
-    print(f"\n📰 ANTARA - {name.upper()}")
-    print("=" * 60)
-    
-    feed = safe_parse(url)
-    
-    if feed is None or feed.bozo:
-        print(f"❌ Error parsing feed: {feed.bozo_exception}")
-        return []
-    
-    articles = []
-    for i, entry in enumerate(feed.entries[:count], 1):
-        published = entry.get("published", "N/A")
-        title     = entry.get("title", "No title")
-        link      = entry.get("link", "")
-        summary   = entry.get("summary", "")[:100] + "..."
+        """Fetch and display articles from an RSS feed"""
+        print(f"\n📰 ANTARA - {name.upper()}")
+        print("=" * 60)
         
-        print(f"{i}. {title}")
-        print(f"   🕐 {published}")
-        print(f"   🔗 {link}")
-        print(f"   📝 {summary}")
-        print()
+        feed = safe_parse(url)
         
-        articles.append({
-            "title"    : title,
-            "link"     : link,
-            "published": published,
-            "summary"  : summary,
-            "source"   : f"ANTARA - {name}"
-        })
-    
-    return articles
+        if feed is None or feed.bozo:
+            print(f"❌ Error parsing feed: {feed.bozo_exception}")
+            return []
+        
+        articles = []
+        for i, entry in enumerate(feed.entries[:count], 1):
+            published = entry.get("published", "N/A")
+            title     = entry.get("title", "No title")
+            link      = entry.get("link", "")
+            summary   = entry.get("summary", "")[:100] + "..."
+            
+            print(f"{i}. {title}")
+            print(f"   🕐 {published}")
+            print(f"   🔗 {link}")
+            print(f"   📝 {summary}")
+            print()
+            
+            articles.append({
+                "title"    : title,
+                "link"     : link,
+                "published": published,
+                "summary"  : summary,
+                "source"   : f"ANTARA - {name}"
+            })
+   
+
+        return articles
 
 def keyword_filter(articles, keywords):
     """Simple keyword filter for OSINT relevance"""
@@ -68,28 +67,42 @@ def keyword_filter(articles, keywords):
     return matched
 
 if __name__ == "__main__":
-    all_articles = []
+            KEYWORDS = ["gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"]
+            INTERVAL = 60  # seconds
+
+            seen_links = set()
+
+            while True:
+                try:
+                    all_articles = []
+                    for name, url in FEEDS.items():
+                            articles = fetch_feed(name, url, count=1)
+                            all_articles.extend(articles)
+
+                    new_articles = [a for a in all_articles if a["link"] not in seen_links]
+                    
+                    if new_articles:
+                        matched = keyword_filter(new_articles, KEYWORDS)
+                        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] 🆕 {len(new_articles)} new article(s) found")
+                        print("=" * 60)
+
+                        if matched:
+                            for a in matched:
+                                print(f"✅ [{a['matched_keyword'].upper()}] {a['title']}")
+                                print(f"   {a['link']}\n")
+
+                        else:
+                            print("No new articles matched the keywords.")
+
+                        for a in new_articles:
+                            seen_links.add(a["link"])
+
+                    else:
+                        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] No new articles found.")
+
+
+                except Exception as e:
+                    print(f"❌ Error: {e}")
+                    matched = keyword_filter(all_articles, KEYWORDS)
+                time.sleep(INTERVAL)
     
-    # Fetch terkini and nasional feeds
-    for name, url in list(FEEDS.items())[:3]:
-        articles = fetch_feed(name, url, count=5)
-        all_articles.extend(articles)
-    
-    # Test keyword filter
-    # KEYWORDS = ["gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"]
-    
-    print("\n" + "=" * 60)
-    print("🔍 KEYWORD FILTER RESULTS")
-    print(f"   Keywords: {KEYWORDS}")
-    print("=" * 60)
-    
-    matched = keyword_filter(all_articles, KEYWORDS)
-    
-    if matched:
-        for a in matched:
-            print(f"✅ [{a['matched_keyword'].upper()}] {a['title']}")
-            print(f"   {a['link']}\n")
-    else:
-        print("No articles matched the keywords.")
-    
-    print(f"\n📊 Total fetched: {len(all_articles)} | Matched: {len(matched)}")

@@ -1,16 +1,16 @@
 channels = [
     "warmonitors",
-    "DDGeopolitics",
-    "FinancialJuice",
-    "medmannews",
-    "intelslava",
-    "boris_rozhin",
-    "nexta_live",
-    "rnintel",
-    "TheIslanderNews",
-    "Slavyangrad",
-    "geopolitics_prime",
-    "worldpravda"
+    # "DDGeopolitics",
+    # "FinancialJuice",
+    # "medmannews",
+    # "intelslava",
+    # "boris_rozhin",
+    # "nexta_live",
+    # "rnintel",
+    # "TheIslanderNews",
+    # "Slavyangrad",
+    # "geopolitics_prime",
+    # "worldpravda"
 ]
 FEEDS = {
                         # ANTARA NEWS
