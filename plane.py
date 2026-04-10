@@ -2,24 +2,84 @@ import requests
 import time
 # Known Indonesian + regional military callsign prefixes
 MIL_CALLSIGN_PATTERNS = [
-    "RCH",    # USAF Reach (airlift)
-    "NAVY",   # US Navy
-    "BAF",    # Belgian Air Force
-    "CNV",    # US Navy Convair
-    "CASA",   # Indonesian CASA CN-235 (TNI-AU)
-    "TNI",    # Tentara Nasional Indonesia
-    "TNIAU",  # TNI Angkatan Udara
-    "TNIAD",  # TNI Angkatan Darat (Army aviation)
-    "PTM",    # Tentara Nasional Malaysia
-    "RMAF",   # Royal Malaysian Air Force
-    "RSAF",   # Republic of Singapore Air Force
-    "RTAF",   # Royal Thai Air Force
-    "PAF",    # Philippine Air Force
-    "VMR",    # Australian Coast Guard / military
-    "VVIP",   # Head of state flights (Indonesian Presiden)
-    "PAKSA",  # Indonesian presidential escort
-]
 
+    # --- USA ---
+    "RCH",     # USAF Air Mobility Command (Reach)
+    "MC",      # Military Command generic
+    "AF",      # US Air Force generic
+    "NAVY",    # US Navy
+    "MARINE",  # US Marine Corps
+    "VM",      # USMC aviation (VMFA, etc.)
+    "HOIST",   # SAR / rescue helos
+    "PAT",     # Patrol aircraft
+    "SPAR",    # US govt VIP (often used by USAF)
+    "SAM",     # Special Air Mission (VIP)
+    "VENUS",   # USAF VIP transport
+    "REACH",   # Full callsign version
+    "HAWK",    # Often fighters/interceptors
+    "EAGLE",   # Fighters (F-15 etc.)
+    "VIPER",   # F-16 callsign
+    "RAPTOR",  # F-22
+    "TEXACO",  # Tanker aircraft
+    "SHELL",   # Tanker
+    "AR",      # Aerial refueling shorthand
+
+    # --- NATO / Europe ---
+    "NATO",    # NATO ops
+    "OTAN",    # NATO (French)
+    "RRR",     # RAF transport (Royal Air Force)
+    "ASCOT",   # UK military transport
+    "COTAM",   # French Air Force transport
+    "FAF",     # French Air Force
+    "GAF",     # German Air Force (Luftwaffe)
+    "LUFTHANSA", # Sometimes used for military charter
+    "BAF",     # Belgian Air Force
+    "DAF",     # Danish Air Force
+    "RNLAF",   # Netherlands AF
+    "SWAF",    # Swedish Air Force
+
+    # --- Asia-Pacific ---
+    "TNI",     # Indonesia (general)
+    "TNIAU",   # Indonesian Air Force
+    "TNIAD",   # Indonesian Army aviation
+    "TNIAL",   # Indonesian Navy aviation
+    "CASA",    # Indonesian CN-235
+    "PAKSA",   # Presidential escort
+    "VVIP",    # VIP flights
+
+    "RMAF",    # Malaysia
+    "PTM",     # Malaysia military
+    "RSAF",    # Singapore
+    "RTAF",    # Thailand
+    "PAF",     # Philippines
+    "JASDF",   # Japan Air Self-Defense Force
+    "JMSDF",   # Japan Maritime Self-Defense Force
+    "ROKAF",   # South Korea Air Force
+    "PLAAF",   # China Air Force
+    "PLAN",    # China Navy aviation
+
+    # --- Australia / NZ ---
+    "RAAF",    # Royal Australian Air Force
+    "RNZAF",   # Royal New Zealand Air Force
+
+    # --- Middle East ---
+    "UAEAF",   # UAE Air Force
+    "QAF",     # Qatar Air Force
+    "RSAF_SA", # Saudi Air Force
+    "IAF",     # Israeli Air Force
+
+    # --- Russia / Eastern ---
+    "VVS",     # Russian Air Force
+    "RF",      # Russian Federation aircraft
+    "RFF",     # Russian military flights
+
+    # --- Generic military patterns ---
+    "MIL",     # Generic military
+    "ARMY",    # Army aviation
+    "AIRFORCE",
+    "NAVAL",
+    "DEFENSE",
+]
 # Indonesian military ICAO hex blocks (TNI-AU assigned ranges)
 # Format: (start_hex, end_hex, label)
 MIL_HEX_RANGES = [
