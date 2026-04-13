@@ -4,7 +4,13 @@ import re
 from datetime import datetime
 from URL import FEEDS
 import time
-
+from flask import Flask,jsonify
+from flask_cors import CORS
+app = Flask(__name__)
+CORS(app)
+seen_links = set()
+KEYWORDS: list =[""]
+INTERVAL: int = 60  
 def safe_parse(url):
     """Fetch and sanitize RSS feed before parsing to avoid XML token errors"""
     try:
@@ -19,42 +25,40 @@ def safe_parse(url):
         return None
 
 # ANTARA RSS Feed URLs
-def fetch_feed(name, url, count=5):
-        """Fetch and display articles from an RSS feed"""
-        print(f"\n📰 ANTARA - {name.upper()}")
-        print("=" * 60)
+def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
+    """Fetch and display articles from an RSS feed"""
+    print(f"\n{name.upper()}")
         
-        feed = safe_parse(url)
+    feed = safe_parse(url)
         
-        if feed is None or feed.bozo:
-            print(f"❌ Error parsing feed: {feed.bozo_exception}")
-            return []
+    if feed is None or feed.bozo:
+        exc = getattr(feed, "bozo_exception", "Unknown error") if feed else "No feed data"
+        print(f"❌ Error parsing feed: {exc}")
+        return []
+    
+    articles = []
+    for i, entry in enumerate(feed.entries[:count], 1):
+        published = entry.get("published", "N/A")
+        title     = entry.get("title", "No title")
+        link      = entry.get("link", "")
+        summary   = entry.get("summary", "")[:100] + "..."
         
-        articles = []
-        for i, entry in enumerate(feed.entries[:count], 1):
-            published = entry.get("published", "N/A")
-            title     = entry.get("title", "No title")
-            link      = entry.get("link", "")
-            summary   = entry.get("summary", "")[:100] + "..."
-            
-            print(f"{i}. {title}")
-            print(f"   🕐 {published}")
-            print(f"   🔗 {link}")
-            print(f"   📝 {summary}")
-            print()
-            
-            articles.append({
-                "title"    : title,
-                "link"     : link,
-                "published": published,
-                "summary"  : summary,
-                "source"   : f"ANTARA - {name}"
-            })
-   
+        print(f"{i}. {title}")
+        print(f"   🕐 {published}")
+        print(f"   🔗 {link}")
+        print(f"   📝 {summary}")
+        print()
+        
+        articles.append({
+            "title"    : title,
+            "link"     : link,
+            "published": published,
+            "summary"  : summary,
 
-        return articles
+        })
+    return articles
 
-def keyword_filter(articles, keywords):
+def keyword_filter(articles: list[dict], keywords: list[str]) -> list[dict]:
     """Simple keyword filter for OSINT relevance"""
     matched = []
     for article in articles:
@@ -66,43 +70,57 @@ def keyword_filter(articles, keywords):
                 break
     return matched
 
+@app.route("/fetch-antara")
+def route_antara():
+    """Return latest article from every feed as JSON."""
+    all_articles = []
+    for name, url in FEEDS.items():
+        all_articles.extend(fetch_feed(name, url, count=1))
+    return jsonify(all_articles)
+
+@app.route("/filter-antara")
+def route_filter_antara():
+    """Return only keyword-matched articles as JSON."""
+    all_articles = []
+    for name, url in FEEDS.items():
+        all_articles.extend(fetch_feed(name, url, count=1))
+    matched = keyword_filter(all_articles, KEYWORDS)
+    return jsonify(matched)
+
+def run_polling():
+    """Continuously poll feeds and print new keyword-matched articles."""
+    global seen_links
+    while True:
+        try:
+            all_articles = []
+            for name, url in FEEDS.items():
+                all_articles.extend(fetch_feed(name, url, count=1))
+
+            new_articles = [a for a in all_articles if a["link"] not in seen_links]
+
+            ts = datetime.now().strftime("%H:%M:%S")
+            if new_articles:
+                matched = keyword_filter(new_articles, KEYWORDS)
+                print(f"\n[{ts}] 🆕 {len(new_articles)} new article(s) found")
+                print("=" * 60)
+
+                if matched:
+                    for a in matched:
+                        print(f"✅ [{a['matched_keyword'].upper()}] {a['title']}")
+                        print(f"   {a['link']}\n")
+                else:
+                    print("No new articles matched the keywords.")
+
+                for a in new_articles:
+                    seen_links.add(a["link"])
+            else:
+                print(f"\n[{ts}] No new articles found.")
+
+        except Exception as e:
+            print(f"❌ Error: {e}")
+
+        time.sleep(INTERVAL)
+
+
 if __name__ == "__main__":
-            KEYWORDS = ["gempa", "banjir", "korupsi", "hacker", "siber", "teknologi", "AI"]
-            INTERVAL = 60  # seconds
-
-            seen_links = set()
-
-            while True:
-                try:
-                    all_articles = []
-                    for name, url in FEEDS.items():
-                            articles = fetch_feed(name, url, count=1)
-                            all_articles.extend(articles)
-
-                    new_articles = [a for a in all_articles if a["link"] not in seen_links]
-                    
-                    if new_articles:
-                        matched = keyword_filter(new_articles, KEYWORDS)
-                        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] 🆕 {len(new_articles)} new article(s) found")
-                        print("=" * 60)
-
-                        if matched:
-                            for a in matched:
-                                print(f"✅ [{a['matched_keyword'].upper()}] {a['title']}")
-                                print(f"   {a['link']}\n")
-
-                        else:
-                            print("No new articles matched the keywords.")
-
-                        for a in new_articles:
-                            seen_links.add(a["link"])
-
-                    else:
-                        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] No new articles found.")
-
-
-                except Exception as e:
-                    print(f"❌ Error: {e}")
-                    matched = keyword_filter(all_articles, KEYWORDS)
-                time.sleep(INTERVAL)
-    
+    app.run(debug=True)
