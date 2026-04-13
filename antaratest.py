@@ -6,6 +6,9 @@ from URL import FEEDS
 import time
 from flask import Flask,jsonify
 from flask_cors import CORS
+import re
+from html import unescape
+
 app = Flask(__name__)
 CORS(app)
 seen_links = set()
@@ -30,6 +33,14 @@ def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
     print(f"\n{name.upper()}")
         
     feed = safe_parse(url)
+
+        
+    seen = set()
+    for entry in feed.entries[:count]:
+        link = entry.get("link", "")
+        if link in seen:
+            continue          
+        seen.add(link)
         
     if feed is None or feed.bozo:
         exc = getattr(feed, "bozo_exception", "Unknown error") if feed else "No feed data"
@@ -41,14 +52,7 @@ def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
         published = entry.get("published", "N/A")
         title     = entry.get("title", "No title")
         link      = entry.get("link", "")
-        summary   = entry.get("summary", "")[:100] + "..."
-        
-        print(f"{i}. {title}")
-        print(f"   🕐 {published}")
-        print(f"   🔗 {link}")
-        print(f"   📝 {summary}")
-        print()
-        
+        summary = clean_summary(entry.get("summary", ""))
         articles.append({
             "title"    : title,
             "link"     : link,
@@ -58,8 +62,13 @@ def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
         })
     return articles
 
+def clean_summary(raw: str, max_len: int = 150) -> str:
+    text = re.sub(r'<[^>]+>', '', raw)
+    text = unescape(text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text[:max_len] + "..." if len(text) > max_len else text
+
 def keyword_filter(articles: list[dict], keywords: list[str]) -> list[dict]:
-    """Simple keyword filter for OSINT relevance"""
     matched = []
     for article in articles:
         text = (article["title"] + " " + article["summary"]).lower()
@@ -72,7 +81,6 @@ def keyword_filter(articles: list[dict], keywords: list[str]) -> list[dict]:
 
 @app.route("/antara")
 def route_antara():
-    """Return latest article from every feed as JSON."""
     all_articles = []
     for name, url in FEEDS.items():
         all_articles.extend(fetch_feed(name, url, count=1))
@@ -88,7 +96,6 @@ def route_filter_antara():
     return jsonify(matched)
 
 def run_polling():
-    """Continuously poll feeds and print new keyword-matched articles."""
     global seen_links
     while True:
         try:
