@@ -216,7 +216,7 @@ def fetch_tiles(lat, lon,dist, label):
         return []
     
 
-@app.route("/aircraft") 
+@app.route("/plane") 
 def get_aircraft():
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     seen_hex = set()   # deduplicate across tiles

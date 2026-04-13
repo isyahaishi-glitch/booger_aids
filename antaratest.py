@@ -70,7 +70,7 @@ def keyword_filter(articles: list[dict], keywords: list[str]) -> list[dict]:
                 break
     return matched
 
-@app.route("/fetch-antara")
+@app.route("/antara")
 def route_antara():
     """Return latest article from every feed as JSON."""
     all_articles = []

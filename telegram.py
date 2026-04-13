@@ -87,7 +87,7 @@ def start_telegram_thread():
     loop.run_until_complete(telegram_main(notelp))
 
 
-@app.route("/fetch-telegram")
+@app.route("/telegram")
 def route_telegram():
     return jsonify(list(latest_messages.values()))
 
