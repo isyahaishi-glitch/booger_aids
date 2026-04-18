@@ -2,7 +2,7 @@ from telethon import TelegramClient
 from dotenv import load_dotenv
 import asyncio
 import os
-from URL import channels
+from backend.all.URL import channels
 load_dotenv()
 from flask import Flask,jsonify
 from flask_cors import CORS
@@ -95,4 +95,4 @@ def route_telegram():
 if __name__ == "__main__":
     t = threading.Thread(target=start_telegram_thread , daemon=True)
     t.start()
-    app.run(debug=False)
+    app.run(debug=False, port=5002)

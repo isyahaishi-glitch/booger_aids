@@ -2,7 +2,7 @@ import feedparser
 import requests
 import re
 from datetime import datetime
-from URL import FEEDS
+from backend.all.URL import FEEDS
 import time
 from flask import Flask,jsonify
 from flask_cors import CORS
@@ -130,4 +130,4 @@ def run_polling():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

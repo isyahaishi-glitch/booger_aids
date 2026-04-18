@@ -33,3 +33,25 @@ FEEDS = {
     "Business"     : "https://feeds.bbci.co.uk/news/business/rss.xml",
     "Health"       : "https://feeds.bbci.co.uk/news/health/rss.xml",
 }
+
+USERNAMES = [
+    "Bloomberg",      # Your original
+    "Reuters",        # Your original
+    "CNN",            # Your original
+    "nytimes",        # The New York Times
+    "washingtonpost", # The Washington Post
+    "WSJ",            # The Wall Street Journal
+    "BBCBreaking",    # BBC Breaking News (very active)
+    "BBCWorld",       # BBC World
+    "AP",             # Associated Press
+    "cnnbrk",         # CNN Breaking News
+    "TheEconomist",   # The Economist
+    "TIME",           # TIME Magazine
+    "FoxNews",        # Fox News
+    "CNBC",           # CNBC (strong on business/finance like Bloomberg)
+    "ABC",            # ABC News
+    "CBSNews",        # CBS News
+    "NBCNews",        # NBC News
+    "AlJazeera",      # Al Jazeera English
+    "ndtv",           # NDTV (good international coverage)
+]
