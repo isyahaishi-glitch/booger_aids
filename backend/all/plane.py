@@ -149,7 +149,7 @@ TILES = [
 HEADERS = {"User-Agent": "military-tracker/1.0"}
 
 # on/pareman filter
-FILTER_ENABLED = False
+FILTER_ENABLED = True
 
 def is_civilian(ac):
     callsign = str(ac.get("flight", "")).strip().upper()
@@ -289,4 +289,4 @@ def get_aircraft():
     print(f"\n[{ts}] 🔍 Scanning {len(TILES)} tiles — mode: {mode}")
     return jsonify({"timestamp": ts, "count": len(hits), "data": hits})
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5003)

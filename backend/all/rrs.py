@@ -2,7 +2,7 @@ import feedparser
 import requests
 import re
 from datetime import datetime
-from backend.all.URL import FEEDS
+from URL import FEEDS
 import time
 from flask import Flask,jsonify
 from flask_cors import CORS
@@ -33,6 +33,10 @@ def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
     print(f"\n{name.upper()}")
         
     feed = safe_parse(url)
+    if feed is None or feed.bozo:
+        exc = getattr(feed, "bozo_exception", "Unknown error") if feed else "No feed data"
+        print(f"❌ Error parsing feed: {exc}")
+        return []
 
         
     seen = set()

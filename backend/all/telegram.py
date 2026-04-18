@@ -2,7 +2,7 @@ from telethon import TelegramClient
 from dotenv import load_dotenv
 import asyncio
 import os
-from backend.all.URL import channels
+from URL import channels
 load_dotenv()
 from flask import Flask,jsonify
 from flask_cors import CORS
