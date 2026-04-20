@@ -96,7 +96,106 @@ MIL_HEX_RANGES = [
     (0x3B0000, 0x3BFFFF, "French Military"),
     (0x687000, 0x6873FF, "Australian Military (RAAF)"),
 ]
-
+MISSION_TYPE_MAP = {
+    # ISR
+    "ISR": "ISR", "JSTARS": "ISR", "RIVET": "ISR", "COBRA": "ISR",
+    "DRAGON": "ISR", "SHADOW": "ISR", "REAPER": "ISR", "PRED": "ISR",
+    "PAT": "ISR", "HOIST": "ISR",
+ 
+    # VIP
+    "SAM": "VIP", "SPAR": "VIP", "VENUS": "VIP",
+    "PAKSA": "VIP", "VVIP": "VIP",
+ 
+    # Bomber
+    "DOOM": "Bomber", "HAVOC": "Bomber", "BONE": "Bomber",
+    "SPIRIT": "Bomber", "BUFF": "Bomber",
+ 
+    # Command & Control
+    "MC": "Command", "NAVY": "Command", "BRASS": "Command", "GOLF": "Command",
+    "MARINE": "Command",
+ 
+    # Tanker
+    "TEXACO": "Tanker", "SHELL": "Tanker", "AR": "Tanker", "KC": "Tanker",
+ 
+    # Transport / Airlift
+    "RCH": "Transport", "REACH": "Transport", "ATLAS": "Transport",
+    "ASCOT": "Transport", "COTAM": "Transport",
+    "TNI": "Transport", "TNIAU": "Transport", "TNIAD": "Transport", "TNIAL": "Transport",
+    "AF": "Transport", "RMAF": "Transport", "RSAF": "Transport",
+    "RTAF": "Transport", "PAF": "Transport", "RAAF": "Transport", "RNZAF": "Transport",
+    "JASDF": "Transport", "JMSDF": "Transport", "ROKAF": "Transport",
+ 
+    # Fighter
+    "HAWK": "Fighter", "EAGLE": "Fighter", "VIPER": "Fighter",
+    "RAPTOR": "Fighter", "TALON": "Fighter",
+}
+ 
+# 2. Aircraft ICAO type code → mission type
+AIRCRAFT_TYPE_MAP = {
+    # ISR / Recon
+    "E3":    "ISR",
+    "E8":    "ISR",
+    "RC135": "ISR",
+    "U2":    "ISR",
+    "P3":    "ISR",
+    "P8":    "ISR",
+    "EP3":   "ISR",
+    "RQ4":   "ISR",
+    "MQ9":   "ISR",
+    "MQ1":   "ISR",
+    # VIP
+    "VC25":  "VIP",
+    "C32":   "VIP",
+    "C37":   "VIP",
+    "C40":   "VIP",
+    "E4":    "VIP",
+    # Command
+    "E6":    "Command",
+    # Bomber
+    "B52":   "Bomber",
+    "B1":    "Bomber",
+    "B2":    "Bomber",
+    "TU95":  "Bomber",
+    "TU22":  "Bomber",
+    # Tanker
+    "KC135": "Tanker",
+    "KC10":  "Tanker",
+    "KC46":  "Tanker",
+    "IL78":  "Tanker",
+    # Transport
+    "C17":   "Transport",
+    "C130":  "Transport",
+    "C5":    "Transport",
+    "C295":  "Transport",
+    "CN235": "Transport",
+    "C27":   "Transport",
+    "AN12":  "Transport",
+    "AN26":  "Transport",
+    "IL76":  "Transport",
+    # Fighter
+    "F15":   "Fighter",
+    "F16":   "Fighter",
+    "F22":   "Fighter",
+    "F35":   "Fighter",
+    "F18":   "Fighter",
+    "FA18":  "Fighter",
+    "SU27":  "Fighter",
+    "SU30":  "Fighter",
+    "MIG29": "Fighter",
+    "JAS39": "Fighter",
+}
+ 
+MISSION_COLORS = {
+    "ISR":       "#ef4444",
+    "VIP":       "#a855f7",
+    "Bomber":    "#f97316",
+    "Command":   "#ec4899",
+    "Tanker":    "#eab308",
+    "Transport": "#3b82f6",
+    "Fighter":   "#06b6d4",
+    "Unknown":   "#6b7280",
+}
+ 
 CIVILIAN_PREFIXES = [
     # Indonesian civilian airlines
     "BTK",  # Batik Air
@@ -150,7 +249,37 @@ HEADERS = {"User-Agent": "military-tracker/1.0"}
 
 # on/pareman filter
 FILTER_ENABLED = True
-
+def classify_mission_type(ac):
+    """
+    Priority order:
+      1. Callsign prefix  (longest match wins)
+      2. Aircraft type code (t or type field)
+      3. Hex-range label inside reasons[]
+      4. "Unknown"
+    """
+    callsign = str(ac.get("flight", "")).strip().upper()
+    ac_type  = str(ac.get("t") or ac.get("type") or "").strip().upper()
+ 
+    # 1. Callsign — longest prefix wins to avoid "MC" swallowing "MARINE"
+    best_match, best_len = None, 0
+    for prefix, mtype in MISSION_TYPE_MAP.items():
+        if callsign.startswith(prefix) and len(prefix) > best_len:
+            best_match, best_len = mtype, len(prefix)
+    if best_match:
+        return best_match
+ 
+    # 2. Aircraft type code
+    for type_key, mtype in AIRCRAFT_TYPE_MAP.items():
+        if ac_type.startswith(type_key) or type_key in ac_type:
+            return mtype
+ 
+    # 3. Infer from hex-range label already in reasons list
+    reasons_text = " ".join(ac.get("reasons", [])).upper()
+    if any(k in reasons_text for k in ("TNI", "INDONESIAN", "USAF", "US MILITARY", "UK MILITARY", "FRENCH", "AUSTRALIAN")):
+        return "Transport"
+ 
+    return "Unknown"
+ 
 def is_civilian(ac):
     callsign = str(ac.get("flight", "")).strip().upper()
     reg      = str(ac.get("r", "")).strip().upper()  # registration field
@@ -246,6 +375,7 @@ def get_aircraft():
     "squawk": ac.get("squawk"),
     "tile": label,
     "reasons": reasons,
+    "mission_type": classify_mission_type(ac),
     "is_military": FILTER_ENABLED and bool(reasons)
 })
             else:
@@ -260,7 +390,9 @@ def get_aircraft():
     "squawk": ac.get("squawk"),
     "tile": label,
     "reasons": ["⚠️ filter disabled — showing all"],
+    "mission_type": classify_mission_type(ac),
     "is_military": False
+    
 })
 
     # print(f"    Scanned ~{total} aircraft ({len(seen_hex)} unique) — {len(hits)} flagged")
