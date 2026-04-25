@@ -24,7 +24,7 @@ def safe_parse(url):
         content = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', response.text)
         return feedparser.parse(content)
     except Exception as e:
-        print(f"❌ Failed to fetch {url}: {e}")
+        print(f" Failed to fetch {url}: {e}")
         return None
 
 # ANTARA RSS Feed URLs
@@ -35,7 +35,7 @@ def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
     feed = safe_parse(url)
     if feed is None or feed.bozo:
         exc = getattr(feed, "bozo_exception", "Unknown error") if feed else "No feed data"
-        print(f"❌ Error parsing feed: {exc}")
+        print(f" Error parsing feed: {exc}")
         return []
 
         
@@ -48,7 +48,7 @@ def fetch_feed(name: str, url: str, count: int = 1) -> list[dict]:
         
     if feed is None or feed.bozo:
         exc = getattr(feed, "bozo_exception", "Unknown error") if feed else "No feed data"
-        print(f"❌ Error parsing feed: {exc}")
+        print(f" Error parsing feed: {exc}")
         return []
     
     articles = []
@@ -117,7 +117,7 @@ def run_polling():
 
                 if matched:
                     for a in matched:
-                        print(f"✅ [{a['matched_keyword'].upper()}] {a['title']}")
+                        print(f" [{a['matched_keyword'].upper()}] {a['title']}")
                         print(f"   {a['link']}\n")
                 else:
                     print("No new articles matched the keywords.")
@@ -128,7 +128,7 @@ def run_polling():
                 print(f"\n[{ts}] No new articles found.")
 
         except Exception as e:
-            print(f"❌ Error: {e}")
+            print(f" Error: {e}")
 
         time.sleep(INTERVAL)
 

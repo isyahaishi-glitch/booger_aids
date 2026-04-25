@@ -42,11 +42,7 @@ async def poll(interval: int = 60):
                         "channel": ch
                     }
 
-                    # if msg.photo:
-                    #     file_path = await msg.download_media(file=f"downloads/{ch}_")
-                    #     print(f"[{ch}] Photo saved: {file_path}\n")
 
-                    # Update the last seen ID
                     if last_seen[ch] is None or msg.id > last_seen[ch]:
                         last_seen[ch] = msg.id
 
@@ -61,7 +57,7 @@ async def telegram_main(phone: str):
         try:
             await client.start(phone=phone)
 
-            # ✅ Fix 4: handle accounts protected by a password (2FA)
+
             if not await client.is_user_authorized():
                 raise RuntimeError("Client not authorized after start()")
 
